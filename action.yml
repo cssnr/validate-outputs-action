@@ -1,0 +1,24 @@
+name: "Validate Outputs"
+description: "Easily Validate Outputs from a GitHub Action or Workflow."
+author: "Shane"
+branding:
+  icon: "type"
+  color: "green"
+
+inputs:
+  outputs:
+    description: "Outputs"
+  data:
+    description: "Data"
+
+outputs:
+  errors:
+    description: "Errors JSON Object"
+  keys:
+    description: "Checked JSON Keys"
+  failed:
+    description: "Failed JSON Keys"
+
+runs:
+  using: "node24"
+  main: "dist/index.js"

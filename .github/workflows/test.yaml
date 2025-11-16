@@ -1,0 +1,95 @@
+name: "Test"
+
+# actions-up-ignore-file
+
+on:
+  workflow_dispatch:
+  #schedule:
+  #  - cron: "18 18 * * 1,3,5"
+  push:
+    branches-ignore: ["master"]
+    paths:
+      - ".github/workflows/test.yaml"
+      - "dist/**"
+      - "src/**"
+      - "package*.json"
+      - "requirements*.txt"
+      - "action.yml"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: "Test"
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v5
+
+      - name: "Debug CTX github"
+        if: ${{ !github.event.act }}
+        continue-on-error: true
+        env:
+          GITHUB_CTX: ${{ toJSON(github) }}
+        run: echo "$GITHUB_CTX"
+
+      - name: "Debug Environment"
+        if: ${{ !github.event.act }}
+        continue-on-error: true
+        run: |
+          env
+
+      - name: "Set Outputs"
+        id: step1
+        run: |
+          echo "test=hello" >> "$GITHUB_OUTPUT"
+          echo "string=im a string" >> "$GITHUB_OUTPUT"
+          echo "zero=0" >> "$GITHUB_OUTPUT"
+          echo "number=420" >> "$GITHUB_OUTPUT"
+          echo "yep=true" >> "$GITHUB_OUTPUT"
+          echo "nope=false" >> "$GITHUB_OUTPUT"
+
+      - name: "Test Local Action"
+        id: test
+        uses: ./
+        with:
+          outputs: ${{ toJSON(steps.step1.outputs) }}
+          data: |
+            test: hello
+            string: im a string
+            #string2:
+            zero: 0
+            number: 420
+            yep: true
+            nope: false
+
+      - name: "Verify Outputs"
+        run: |
+          echo "errors: ${{ steps.test.outputs.errors }}"
+          if [ -z "${{ steps.test.outputs.errors }}" ];then
+            echo "No Output: errors"
+            exit 1
+          fi
+          echo "keys: ${{ steps.test.outputs.keys }}"
+          if [ "${{ steps.test.outputs.keys }}" != "[test,string,zero,number,yep,nope]" ];then
+            echo "Invalid Output: keys"
+            exit 1
+          fi
+          echo "failed: ${{ steps.test.outputs.failed }}"
+          if [ -z "${{ steps.test.outputs.failed }}" ];then
+            echo "No Output: failed"
+            exit 1
+          fi
+
+      - name: "Schedule Failure Notification"
+        if: ${{ failure() && github.event_name == 'schedule' }}
+        uses: sarisia/actions-status-discord@v1
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
