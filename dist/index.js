@@ -31143,7 +31143,7 @@ async function main() {
         console.log('\u001b[36;1m result:\u001b[0m', result);
 
         // Check if Key Exist
-        if (result === undefined) {
+        if (!result) {
             console.log(`\u001b[31;1m missing`);
             errors[key] = `Missing Output: ${key}`;
             continue
