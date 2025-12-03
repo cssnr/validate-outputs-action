@@ -31141,7 +31141,8 @@ async function main() {
         console.log(`--- \u001b[32;1m${key}`);
         const parsed = typeof value === 'string' ? value : JSON.stringify(value);
         console.log(`\u001b[34;1m expected:\u001b[0m`, parsed);
-        const result = outputs[key];
+        const result =
+            typeof outputs[key] === 'string' ? outputs[key] : JSON.stringify(outputs[key]);
         console.log('  \u001b[36;1m result:\u001b[0m', result);
 
         // Check if Key Exist
