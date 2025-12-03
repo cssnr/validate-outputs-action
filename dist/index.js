@@ -31138,9 +31138,11 @@ async function main() {
     coreExports.info('⌛ Processing...');
     const errors = {};
     for (const [key, value] of Object.entries(data)) {
-        console.log(`-- \u001b[34;1m${key}\u001b[0m:`, value);
+        console.log(`--- \u001b[32;1m${key}`);
+        const parsed = typeof value === 'string' ? value : JSON.stringify(value);
+        console.log(`\u001b[34;1m expected:\u001b[0m`, parsed);
         const result = outputs[key];
-        console.log('\u001b[36;1m result:\u001b[0m', result);
+        console.log('  \u001b[36;1m result:\u001b[0m', result);
 
         // Check if Key Exist
         if (!result) {
@@ -31152,8 +31154,7 @@ async function main() {
         if (value === null) continue
 
         // Check if Value equals Value
-        const parsed = typeof value === 'string' ? value : JSON.stringify(value);
-        if (result !== parsed) {
+        if (parsed !== result) {
             console.log(`\u001b[33;1m invalid`);
             const error = `Invalid Output: ${key} --- ${parsed} != ${result}`;
             console.log(error);
