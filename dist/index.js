@@ -28375,6 +28375,27 @@ function getInput(name, options) {
     return val.trim();
 }
 /**
+ * Gets the input value of the boolean type in the YAML 1.2 "core schema" specification.
+ * Support boolean input list: `true | True | TRUE | false | False | FALSE` .
+ * The return value is also in boolean type.
+ * ref: https://yaml.org/spec/1.2/spec.html#id2804923
+ *
+ * @param     name     name of the input to get
+ * @param     options  optional. See InputOptions.
+ * @returns   boolean
+ */
+function getBooleanInput(name, options) {
+    const trueValue = ['true', 'True', 'TRUE'];
+    const falseValue = ['false', 'False', 'FALSE'];
+    const val = getInput(name);
+    if (trueValue.includes(val))
+        return true;
+    if (falseValue.includes(val))
+        return false;
+    throw new TypeError(`Input does not meet YAML 1.2 "Core Schema" specification: ${name}\n` +
+        `Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
+}
+/**
  * Sets the value of an output.
  *
  * @param     name     name of the output to set
@@ -30698,6 +30719,7 @@ async function main() {
     const inputs = {
         outputs: getInput('outputs'),
         data: getInput('data'),
+        invert: getBooleanInput('invert'),
     };
 
     startGroup('Inputs');
@@ -30729,8 +30751,19 @@ async function main() {
 
         // Check if Key Exist
         if (outputs[key] === undefined) {
+            if (inputs.invert) {
+                console.log(`\u001b[32;1m correctly missing`);
+                continue
+            }
             console.log(`\u001b[31;1m missing`);
             errors[key] = `Missing Output: ${key}`;
+            continue
+        }
+
+        // Invert: any existing output is unexpected
+        if (inputs.invert) {
+            console.log(`\u001b[31;1m unexpected`);
+            errors[key] = `Unexpected Output: ${key} --- ${parsed}`;
             continue
         }
 

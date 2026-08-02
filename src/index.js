@@ -19,6 +19,7 @@ async function main() {
     const inputs = {
         outputs: core.getInput('outputs'),
         data: core.getInput('data'),
+        invert: core.getBooleanInput('invert'),
     }
 
     core.startGroup('Inputs')
@@ -50,8 +51,19 @@ async function main() {
 
         // Check if Key Exist
         if (outputs[key] === undefined) {
+            if (inputs.invert) {
+                console.log(`\u001b[32;1m correctly missing`)
+                continue
+            }
             console.log(`\u001b[31;1m missing`)
             errors[key] = `Missing Output: ${key}`
+            continue
+        }
+
+        // Invert: any existing output is unexpected
+        if (inputs.invert) {
+            console.log(`\u001b[31;1m unexpected`)
+            errors[key] = `Unexpected Output: ${key} --- ${parsed}`
             continue
         }
 

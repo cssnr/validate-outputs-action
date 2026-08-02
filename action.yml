@@ -10,6 +10,9 @@ inputs:
     description: "Outputs"
   data:
     description: "Data"
+  invert:
+    description: "Invert validation: outputs should not match or not exist"
+    default: "false"
 
 outputs:
   errors:
