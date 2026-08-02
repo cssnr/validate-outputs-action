@@ -1,5 +1,5 @@
 import * as core from '@actions/core'
-import yaml from 'js-yaml'
+import { load } from 'js-yaml'
 
 async function main() {
     const version = process.env.GITHUB_ACTION_REF
@@ -31,7 +31,7 @@ async function main() {
     core.endGroup() // Outputs
 
     core.startGroup('Data')
-    const data = yaml.load(inputs.data)
+    const data = load(inputs.data)
     console.log(data)
     core.endGroup() // Data
 
@@ -49,7 +49,7 @@ async function main() {
         console.log('  \u001b[36;1m result:\u001b[0m', result)
 
         // Check if Key Exist
-        if (!result) {
+        if (outputs[key] === undefined) {
             console.log(`\u001b[31;1m missing`)
             errors[key] = `Missing Output: ${key}`
             continue
