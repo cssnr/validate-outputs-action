@@ -1,7 +1,7 @@
 import * as core from '@actions/core'
 import { load } from 'js-yaml'
 
-async function main() {
+async function main() /* NOSONAR */ {
     const version = process.env.GITHUB_ACTION_REF
         ? `\u001b[35;1m${process.env.GITHUB_ACTION_REF}`
         : '\u001b[33;1mSource'

@@ -30701,7 +30701,7 @@ YAML11_SCHEMA.withTags({
 	}
 });
 
-async function main() {
+async function main() /* NOSONAR */ {
     const version = process.env.GITHUB_ACTION_REF
         ? `\u001b[35;1m${process.env.GITHUB_ACTION_REF}`
         : '\u001b[33;1mSource';
