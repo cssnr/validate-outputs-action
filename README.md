@@ -42,10 +42,11 @@ Easily Validate Outputs from a GitHub Action or Workflow.
 
 ## Inputs
 
-| Input   | Required&nbsp;Value&nbsp;for&nbsp;the&nbsp;Input | Input&nbsp;Description |
-| :------ | :----------------------------------------------- | :--------------------- |
-| outputs | `${{ toJSON(steps.test.outputs) }}`              | Outputs JSON Data      |
-| data    | [Data to Verify in YAML format](#outputs)        | Validation YAML Data   |
+| Input   | Required&nbsp;Value&nbsp;for&nbsp;the&nbsp;Input | Input&nbsp;Description                             |
+| :------ | :----------------------------------------------- | :------------------------------------------------- |
+| outputs | `${{ toJSON(steps.test.outputs) }}`              | Outputs JSON Data                                  |
+| data    | [Data to Verify in YAML format](#outputs)        | Validation YAML Data                               |
+| invert  | `true`/`false`                                   | Invert the validation to assert outputs are absent |
 
 #### outputs
 
@@ -66,6 +67,21 @@ data: |
   output1: must equal this
   output2: # must exist
   output3: ${{ steps.validate.outputs.output3 }}
+```
+
+#### invert
+
+Set `invert: true` to assert that the outputs do **not** exist. Use this when validating a step that is
+expected to have failed (no outputs were set).
+
+```yaml
+- name: 'Validate Outputs'
+  uses: cssnr/validate-outputs-action@master
+  with:
+    outputs: ${{ toJSON(steps.test.outputs) }}
+    data: |
+      output1: # must not exist
+    invert: true
 ```
 
 ## Outputs

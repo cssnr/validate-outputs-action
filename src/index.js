@@ -1,7 +1,7 @@
 import * as core from '@actions/core'
-import yaml from 'js-yaml'
+import { load } from 'js-yaml'
 
-async function main() {
+async function main() /* NOSONAR */ {
     const version = process.env.GITHUB_ACTION_REF
         ? `\u001b[35;1m${process.env.GITHUB_ACTION_REF}`
         : '\u001b[33;1mSource'
@@ -19,6 +19,7 @@ async function main() {
     const inputs = {
         outputs: core.getInput('outputs'),
         data: core.getInput('data'),
+        invert: core.getBooleanInput('invert'),
     }
 
     core.startGroup('Inputs')
@@ -31,7 +32,7 @@ async function main() {
     core.endGroup() // Outputs
 
     core.startGroup('Data')
-    const data = yaml.load(inputs.data)
+    const data = load(inputs.data)
     console.log(data)
     core.endGroup() // Data
 
@@ -39,22 +40,37 @@ async function main() {
     core.info('⌛ Processing...')
     const errors = {}
     for (const [key, value] of Object.entries(data)) {
-        console.log(`-- \u001b[34;1m${key}\u001b[0m:`, value)
-        const result = outputs[key]
-        console.log('\u001b[36;1m result:\u001b[0m', result)
+        console.log(`--- \u001b[32;1m${key}`)
+        console.log('typeof value:', typeof value)
+        const parsed = typeof value === 'string' ? value : JSON.stringify(value)
+        console.log(`\u001b[34;1m expected:\u001b[0m`, parsed)
+        console.log('typeof outputs[key]:', typeof outputs[key])
+        const result =
+            typeof outputs[key] === 'string' ? outputs[key] : JSON.stringify(outputs[key])
+        console.log('  \u001b[36;1m result:\u001b[0m', result)
 
         // Check if Key Exist
-        if (!result) {
+        if (outputs[key] === undefined) {
+            if (inputs.invert) {
+                console.log(`\u001b[32;1m correctly missing`)
+                continue
+            }
             console.log(`\u001b[31;1m missing`)
             errors[key] = `Missing Output: ${key}`
+            continue
+        }
+
+        // Invert: any existing output is unexpected
+        if (inputs.invert) {
+            console.log(`\u001b[31;1m unexpected`)
+            errors[key] = `Unexpected Output: ${key} --- ${parsed}`
             continue
         }
 
         if (value === null) continue
 
         // Check if Value equals Value
-        const parsed = typeof value === 'string' ? value : JSON.stringify(value)
-        if (result !== parsed) {
+        if (parsed !== result) {
             console.log(`\u001b[33;1m invalid`)
             const error = `Invalid Output: ${key} --- ${parsed} != ${result}`
             console.log(error)

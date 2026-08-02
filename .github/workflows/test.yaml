@@ -55,6 +55,7 @@ jobs:
           echo "number=420" >> "$GITHUB_OUTPUT"
           echo "yep=true" >> "$GITHUB_OUTPUT"
           echo "nope=false" >> "$GITHUB_OUTPUT"
+          echo "empty=" >> "$GITHUB_OUTPUT"
 
       - name: "Test Local Action"
         id: test
@@ -69,6 +70,7 @@ jobs:
             number: 420
             yep: true
             nope: false
+            empty: ''
 
       - name: "Verify Outputs"
         run: |
@@ -78,7 +80,7 @@ jobs:
             exit 1
           fi
           echo "keys: ${{ steps.test.outputs.keys }}"
-          if [ "${{ steps.test.outputs.keys }}" != "[test,string,zero,number,yep,nope]" ];then
+          if [ "${{ steps.test.outputs.keys }}" != "[test,string,zero,number,yep,nope,empty]" ];then
             echo "Invalid Output: keys"
             exit 1
           fi
